@@ -1,16 +1,16 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from "react";
+import PropTypes from "prop-types";
 import {
   PanResponder,
   Animated,
   Dimensions,
   StyleSheet,
   Platform
-} from 'react-native';
-const { width, height } = Dimensions.get('window');
+} from "react-native";
+const { width, height } = Dimensions.get("window");
 
-const PESPECTIVE = Platform.OS === 'ios' ? 2.38 : 1.7;
-const TR_POSITION = Platform.OS === 'ios' ? 2 : 1.5;
+const PESPECTIVE = Platform.OS === "ios" ? 2.38 : 1.7;
+const TR_POSITION = Platform.OS === "ios" ? 2 : 1.5;
 
 export default class CubeNavigationHorizontal extends React.Component {
   constructor(props) {
@@ -34,13 +34,13 @@ export default class CubeNavigationHorizontal extends React.Component {
       this._value = value;
     });
 
-    const onDoneSwiping = (gestureState) => {
+    const onDoneSwiping = gestureState => {
       if (this.props.callbackOnSwipe) {
         this.props.callbackOnSwipe(false);
       }
       let mod = gestureState.dx > 0 ? 100 : -100;
 
-      const currentPage = this._closest(this._value.x + mod)
+      const currentPage = this._closest(this._value.x + mod);
       let goTo = this.pages[currentPage];
       this._animatedValue.flattenOffset({
         x: this._value.x,
@@ -58,11 +58,12 @@ export default class CubeNavigationHorizontal extends React.Component {
         if (this.props.callBackAfterSwipe)
           this.props.callBackAfterSwipe(goTo, Math.abs(goTo / width));
       }, 500);
-    }
+    };
 
     this._panResponder = PanResponder.create({
       onMoveShouldSetResponderCapture: () => true,
-      onMoveShouldSetResponderCapture: () => Math.abs(gestureState.dx) > this.props.responderCaptureDx,
+      onMoveShouldSetResponderCapture: () =>
+        Math.abs(gestureState.dx) > this.props.responderCaptureDx,
       onMoveShouldSetPanResponderCapture: (evt, gestureState) =>
         Math.abs(gestureState.dx) > this.props.responderCaptureDx,
       onPanResponderGrant: (e, gestureState) => {
@@ -74,10 +75,10 @@ export default class CubeNavigationHorizontal extends React.Component {
       },
       onPanResponderMove: (e, gestureState) => {
         if (this.props.loop) {
-          if (gestureState.dx < 0 && this._value.x < - this.fullWidth) {
+          if (gestureState.dx < 0 && this._value.x < -this.fullWidth) {
             this._animatedValue.setOffset({ x: width });
           } else if (gestureState.dx > 0 && this._value.x > 0) {
-            this._animatedValue.setOffset({ x: - (this.fullWidth + width ) });
+            this._animatedValue.setOffset({ x: -(this.fullWidth + width) });
           }
         }
         Animated.event([null, { dx: this._animatedValue.x }])(e, gestureState);
@@ -87,7 +88,7 @@ export default class CubeNavigationHorizontal extends React.Component {
       },
       onPanResponderTerminate: (e, gestureState) => {
         onDoneSwiping(gestureState);
-      },
+      }
     });
   }
 
@@ -126,34 +127,41 @@ export default class CubeNavigationHorizontal extends React.Component {
   _getTransformsFor = i => {
     let scrollX = this._animatedValue.x;
     let pageX = -width * i;
-    let loopVariable = (variable, sign = 1) => variable + Math.sign(sign) * (this.fullWidth + width );
-    let padInput = (variables) => {
-      if (!this.props.loop) 
-        return variables;
+    let loopVariable = (variable, sign = 1) =>
+      variable + Math.sign(sign) * (this.fullWidth + width);
+    let padInput = variables => {
+      if (!this.props.loop) return variables;
       const returnedVariables = [...variables];
-      returnedVariables.unshift(...variables.map(variable => loopVariable(variable, -1)))
-      returnedVariables.push(...variables.map(variable => loopVariable(variable, 1)))
+      returnedVariables.unshift(
+        ...variables.map(variable => loopVariable(variable, -1))
+      );
+      returnedVariables.push(
+        ...variables.map(variable => loopVariable(variable, 1))
+      );
       return returnedVariables;
-    }
-    let padOutput = (variables) => {
-      if (!this.props.loop) 
-        return variables;
+    };
+    let padOutput = variables => {
+      if (!this.props.loop) return variables;
       const returnedVariables = [...variables];
-      returnedVariables.unshift(...variables)
-      returnedVariables.push(...variables)
+      returnedVariables.unshift(...variables);
+      returnedVariables.push(...variables);
       return returnedVariables;
-    }
+    };
 
     let translateX = scrollX.interpolate({
       inputRange: padInput([pageX - width, pageX, pageX + width]),
-      outputRange: padOutput([(-width - 1) / TR_POSITION, 0, (width + 1) / TR_POSITION]),
-      extrapolate: 'clamp'
+      outputRange: padOutput([
+        (-width - 1) / TR_POSITION,
+        0,
+        (width + 1) / TR_POSITION
+      ]),
+      extrapolate: "clamp"
     });
 
     let rotateY = scrollX.interpolate({
       inputRange: padInput([pageX - width, pageX, pageX + width]),
-      outputRange: padOutput(['-60deg', '0deg', '60deg']),
-      extrapolate: 'clamp'
+      outputRange: padOutput(["-60deg", "0deg", "60deg"]),
+      extrapolate: "clamp"
     });
 
     let translateXAfterRotate = scrollX.interpolate({
@@ -171,19 +179,7 @@ export default class CubeNavigationHorizontal extends React.Component {
         (width + 1) / PESPECTIVE,
         +width + 1
       ]),
-      extrapolate: 'clamp'
-    });
-
-    let opacity = scrollX.interpolate({
-      inputRange: padInput([
-        pageX - width,
-        pageX - width + 10,
-        pageX,
-        pageX + width - 250,
-        pageX + width
-      ]),
-      outputRange: padOutput([0, 0.6, 1, 0.6, 0]),
-      extrapolate: 'clamp'
+      extrapolate: "clamp"
     });
 
     return {
@@ -192,8 +188,7 @@ export default class CubeNavigationHorizontal extends React.Component {
         { translateX },
         { rotateY: rotateY },
         { translateX: translateXAfterRotate }
-      ],
-      opacity: opacity
+      ]
     };
   };
 
@@ -212,11 +207,11 @@ export default class CubeNavigationHorizontal extends React.Component {
       <Animated.View
         style={[
           StyleSheet.absoluteFill,
-          { backgroundColor: 'transparent' },
+          { backgroundColor: "transparent" },
           this._getTransformsFor(i, false)
         ]}
         key={`child- ${i}`}
-        pointerEvents={this.state.currentPage == i ? 'auto' :'none'}
+        pointerEvents={this.state.currentPage == i ? "auto" : "none"}
       >
         {element}
       </Animated.View>
@@ -245,7 +240,7 @@ export default class CubeNavigationHorizontal extends React.Component {
 
     return (
       <Animated.View
-        style={[{ position: 'absolute' }]}
+        style={[{ position: "absolute" }]}
         ref={view => {
           this._scrollView = view;
         }}
@@ -253,7 +248,7 @@ export default class CubeNavigationHorizontal extends React.Component {
       >
         <Animated.View
           style={[
-            { backgroundColor: '#000', position: 'absolute', width, height },
+            { backgroundColor: "#000", position: "absolute", width, height },
             expandStyle
           ]}
         >
